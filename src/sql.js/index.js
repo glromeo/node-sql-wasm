@@ -174,9 +174,15 @@ export default (wasmModule, Sqlite3) => {
         @throw [String] SQLite Error
         */
         'bind'(values) {
-            if (!this.stmt) { throw "Statement closed"; }
+            if (!this.stmt) {
+                throw "Statement closed";
+            }
             this['reset']();
-            if (Array.isArray(values)) { return this.bindFromArray(values); } else { return this.bindFromObject(values); }
+            if (Array.isArray(values)) {
+                return this.bindFromArray(values);
+            } else {
+                return this.bindFromObject(values);
+            }
         }
 
         /* Execute the statement, fetching the the next line of result,
@@ -187,27 +193,48 @@ export default (wasmModule, Sqlite3) => {
         */
         'step'() {
             let ret;
-            if (!this.stmt) { throw "Statement closed"; }
+            if (!this.stmt) {
+                throw "Statement closed";
+            }
             this.pos = 1;
             switch ((ret = sqlite3_step(this.stmt))) {
-                case SQLite.ROW:  return true;
-                case SQLite.DONE: return false;
-                default: return this.db.handleError(ret);
+                case SQLite.ROW:
+                    return true;
+                case SQLite.DONE:
+                    return false;
+                default:
+                    return this.db.handleError(ret);
             }
         }
 
         // Internal methods to retrieve data from the results of a statement that has been executed
         // @nodoc
-        getNumber(pos) { if (pos == null) { pos = this.pos++; } return sqlite3_column_double(this.stmt, pos); }
+        getNumber(pos) {
+            if (pos == null) {
+                pos = this.pos++;
+            }
+            return sqlite3_column_double(this.stmt, pos);
+        }
+
         // @nodoc
-        getString(pos) { if (pos == null) { pos = this.pos++; } return sqlite3_column_text(this.stmt, pos); }
+        getString(pos) {
+            if (pos == null) {
+                pos = this.pos++;
+            }
+            return sqlite3_column_text(this.stmt, pos);
+        }
+
         // @nodoc
         getBlob(pos) {
-            if (pos == null) { pos = this.pos++; }
+            if (pos == null) {
+                pos = this.pos++;
+            }
             const size = sqlite3_column_bytes(this.stmt, pos);
             const ptr = sqlite3_column_blob(this.stmt, pos);
             const result = new Uint8Array(size);
-            for (let i = 0, end = size, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) { result[i] = HEAP8[ptr+i]; }
+            for (let i = 0, end = size, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+                result[i] = HEAP8[ptr + i];
+            }
             return result;
         }
 
@@ -222,15 +249,25 @@ export default (wasmModule, Sqlite3) => {
             while (stmt.step()) console.log(stmt.get());
         */
         'get'(params) { // Get all fields
-            if (params != null) { this['bind'](params) && this['step'](); }
+            if (params != null) {
+                this['bind'](params) && this['step']();
+            }
             return (() => {
                 const result = [];
                 for (let field = 0, end = sqlite3_data_count(this.stmt), asc = 0 <= end; asc ? field < end : field > end; asc ? field++ : field--) {
                     switch (sqlite3_column_type(this.stmt, field)) {
-                        case SQLite.INTEGER: case SQLite.FLOAT: result.push(this.getNumber(field)); break;
-                        case SQLite.TEXT: result.push(this.getString(field)); break;
-                        case SQLite.BLOB: result.push(this.getBlob(field)); break;
-                        default: result.push(null);
+                        case SQLite.INTEGER:
+                        case SQLite.FLOAT:
+                            result.push(this.getNumber(field));
+                            break;
+                        case SQLite.TEXT:
+                            result.push(this.getString(field));
+                            break;
+                        case SQLite.BLOB:
+                            result.push(this.getBlob(field));
+                            break;
+                        default:
+                            result.push(null);
                     }
                 }
                 return result;
@@ -246,8 +283,8 @@ export default (wasmModule, Sqlite3) => {
             console.log(stmt.getColumnNames()); // Will print ['nbr','data','nothing']
         */
         'getColumnNames'() {
-                return __range__(0, sqlite3_data_count(this.stmt), false).map((i) => sqlite3_column_name(this.stmt, i));
-            }
+            return __range__(0, sqlite3_data_count(this.stmt), false).map((i) => sqlite3_column_name(this.stmt, i));
+        }
 
         /* Get one row of result as a javascript object, associating column names with
         their value in the current row.
@@ -263,9 +300,12 @@ export default (wasmModule, Sqlite3) => {
         */
         'getAsObject'(params) {
             const values = this['get'](params);
-            const names  = this['getColumnNames']();
+            const names = this['getColumnNames']();
             const rowObject = {};
-            for (let i = 0; i < names.length; i++) { const name = names[i]; rowObject[name] = values[i]; }
+            for (let i = 0; i < names.length; i++) {
+                const name = names[i];
+                rowObject[name] = values[i];
+            }
             return rowObject;
         }
 
@@ -274,7 +314,9 @@ export default (wasmModule, Sqlite3) => {
         @param [Array,Object] Value to bind to the statement
         */
         'run'(values) {
-            if (values != null) { this['bind'](values); }
+            if (values != null) {
+                this['bind'](values);
+            }
             this['step']();
             return this['reset']();
         }
@@ -284,17 +326,21 @@ export default (wasmModule, Sqlite3) => {
         // @nodoc
         bindString(string, pos) {
             let strptr;
-            if (pos == null) { pos = this.pos++; }
+            if (pos == null) {
+                pos = this.pos++;
+            }
             const bytes = intArrayFromString(string);
             this.allocatedmem.push(strptr = allocate(bytes, 'i8', ALLOC_NORMAL));
-            this.db.handleError(sqlite3_bind_text(this.stmt, pos, strptr, bytes.length-1, 0));
+            this.db.handleError(sqlite3_bind_text(this.stmt, pos, strptr, bytes.length - 1, 0));
             return true;
         }
 
         // @nodoc
         bindBlob(array, pos) {
             let blobptr;
-            if (pos == null) { pos = this.pos++; }
+            if (pos == null) {
+                pos = this.pos++;
+            }
             this.allocatedmem.push(blobptr = allocate(array, 'i8', ALLOC_NORMAL));
             this.db.handleError(sqlite3_bind_blob(this.stmt, pos, blobptr, array.length, 0));
             return true;
@@ -303,28 +349,46 @@ export default (wasmModule, Sqlite3) => {
         // @private
         // @nodoc
         bindNumber(num, pos) {
-            if (pos == null) { pos = this.pos++; }
-            const bindfunc = num === (num|0) ? sqlite3_bind_int : sqlite3_bind_double;
+            if (pos == null) {
+                pos = this.pos++;
+            }
+            const bindfunc = num === (num | 0) ? sqlite3_bind_int : sqlite3_bind_double;
             this.db.handleError(bindfunc(this.stmt, pos, num));
             return true;
         }
 
         // @nodoc
-        bindNull(pos) { if (pos == null) { pos = this.pos++; } return sqlite3_bind_blob(this.stmt, pos, 0,0,0) === SQLite.OK; }
+        bindNull(pos) {
+            if (pos == null) {
+                pos = this.pos++;
+            }
+            return sqlite3_bind_blob(this.stmt, pos, 0, 0, 0) === SQLite.OK;
+        }
+
         // Call bindNumber or bindString appropriatly
         // @private
         // @nodoc
         bindValue(val, pos) {
-            if (pos == null) { pos = this.pos++; }
+            if (pos == null) {
+                pos = this.pos++;
+            }
             switch (typeof val) {
-                case "string": return this.bindString(val, pos);
-                case "number":case "boolean": return this.bindNumber(val+0, pos);
+                case "string":
+                    return this.bindString(val, pos);
+                case "number":
+                case "boolean":
+                    return this.bindNumber(val + 0, pos);
                 case "object":
-                    if (val === null) { return this.bindNull(pos);
-                    } else if (val.length != null) { return this.bindBlob(val, pos);
-                    } else { throw `Wrong API use : tried to bind a value of an unknown type (${val}).`; }
+                    if (val === null) {
+                        return this.bindNull(pos);
+                    } else if (val.length != null) {
+                        return this.bindBlob(val, pos);
+                    } else {
+                        throw `Wrong API use : tried to bind a value of an unknown type (${val}).`;
+                    }
             }
         }
+
         /* Bind names and values of an object to the named parameters of the statement
         @param [Object]
         @private
@@ -334,17 +398,23 @@ export default (wasmModule, Sqlite3) => {
             for (let name in valuesObj) {
                 const value = valuesObj[name];
                 const num = sqlite3_bind_parameter_index(this.stmt, name);
-                if (num !== 0) { this.bindValue(value, num); }
+                if (num !== 0) {
+                    this.bindValue(value, num);
+                }
             }
             return true;
         }
+
         /* Bind values to numbered parameters
         @param [Array]
         @private
         @nodoc
         */
         bindFromArray(values) {
-            for (let num = 0; num < values.length; num++) { const value = values[num]; this.bindValue(value, num+1); }
+            for (let num = 0; num < values.length; num++) {
+                const value = values[num];
+                this.bindValue(value, num + 1);
+            }
             return true;
         }
 
@@ -354,14 +424,16 @@ export default (wasmModule, Sqlite3) => {
         'reset'() {
             this.freemem();
             return (sqlite3_clear_bindings(this.stmt) === SQLite.OK) &&
-            (sqlite3_reset(this.stmt) === SQLite.OK);
+                (sqlite3_reset(this.stmt) === SQLite.OK);
         }
 
         /* Free the memory allocated during parameter binding
         */
         freemem() {
             let mem;
-            while ((mem = this.allocatedmem.pop())) { _free(mem); }
+            while ((mem = this.allocatedmem.pop())) {
+                _free(mem);
+            }
             return null;
         }
 
@@ -382,9 +454,11 @@ export default (wasmModule, Sqlite3) => {
         // Open a new database either by creating a new one or opening an existing one,
         // stored in the byte array passed in first argument
         // @param data [Array<Integer>] An array of bytes representing an SQLite database file
-        constructor(data) {
-            this.filename = `dbfile_${(0xffffffff*Math.random())>>>0}`;
-            if (data) { createDataFile('/', this.filename, data, true, true); }
+        constructor(filename) {
+            this.filename = filename ? `./${filename}` : `dbfile_${(0xffffffff * Math.random()) >>> 0}`;
+            if (filename) {
+                console.log("sqlite database:", filename);
+            }
             this.handleError(sqlite3_open(this.filename, apiTemp));
             this.db = getValue(apiTemp, 'i32');
             RegisterExtensionFunctions(this.db);
@@ -405,7 +479,9 @@ export default (wasmModule, Sqlite3) => {
         @return [Database] The database object (useful for method chaining)
         */
         'run'(sql, params) {
-            if (!this.db) { throw "Database closed"; }
+            if (!this.db) {
+                throw "Database closed";
+            }
             if (params) {
                 const stmt = this['prepare'](sql, params);
                 stmt['step']();
@@ -456,37 +532,41 @@ export default (wasmModule, Sqlite3) => {
         @return [Array<QueryResults>] An array of results.
         */
         'exec'(sql) {
-            if (!this.db) { throw "Database closed"; }
+            if (!this.db) {
+                throw "Database closed";
+            }
 
             const stack = stackSave();
             // Store the SQL string in memory. The string will be consumed, one statement
             // at a time, by sqlite3_prepare_v2_sqlptr.
             // Allocate at most 4 bytes per UTF8 char, +1 for the trailing '\0'
-            let nextSqlPtr = stackAlloc(sql.length<<(2 + 1));
+            let nextSqlPtr = stackAlloc(sql.length << (2 + 1));
             const lengthBytes = lengthBytesUTF8(sql) + 1;
             stringToUTF8(sql, nextSqlPtr, lengthBytes);
             // Used to store a pointer to the next SQL statement in the string
             const pzTail = stackAlloc(4);
 
             const results = [];
-            while (getValue(nextSqlPtr,'i8') !== NULL) {
+            while (getValue(nextSqlPtr, 'i8') !== NULL) {
                 setValue(apiTemp, 0, 'i32');
                 setValue(pzTail, 0, 'i32');
                 this.handleError(sqlite3_prepare_v2_sqlptr(this.db, nextSqlPtr, -1, apiTemp, pzTail));
                 const pStmt = getValue(apiTemp, 'i32'); //  pointer to a statement, or null
                 nextSqlPtr = getValue(pzTail, 'i32');
-                if (pStmt === NULL) { continue; } // Empty statement
+                if (pStmt === NULL) {
+                    continue;
+                } // Empty statement
                 const stmt = new Statement(pStmt, this);
                 let curresult = null;
                 while (stmt['step']()) {
-                if (curresult === null) {
-                    curresult = {
-                    'columns' : stmt['getColumnNames'](),
-                    'values' : []
-                    };
-                    results.push(curresult);
-                }
-                curresult['values'].push(stmt['get']());
+                    if (curresult === null) {
+                        curresult = {
+                            'columns': stmt['getColumnNames'](),
+                            'values': []
+                        };
+                        results.push(curresult);
+                    }
+                    curresult['values'].push(stmt['get']());
                 }
                 stmt['free']();
             }
@@ -522,10 +602,12 @@ export default (wasmModule, Sqlite3) => {
             }
             const stmt = this['prepare'](sql, params);
             while (stmt['step']()) {
-            callback(stmt['getAsObject']());
+                callback(stmt['getAsObject']());
             }
             stmt['free']();
-            if (typeof done === 'function') { return done(); }
+            if (typeof done === 'function') {
+                return done();
+            }
         }
 
         /* Prepare an SQL statement
@@ -538,9 +620,13 @@ export default (wasmModule, Sqlite3) => {
             setValue(apiTemp, 0, 'i32');
             this.handleError(sqlite3_prepare_v2(this.db, sql, -1, apiTemp, NULL));
             const pStmt = getValue(apiTemp, 'i32'); //  pointer to a statement, or null
-            if (pStmt === NULL) { throw 'Nothing to prepare'; }
+            if (pStmt === NULL) {
+                throw 'Nothing to prepare';
+            }
             const stmt = new Statement(pStmt, this);
-            if (params != null) { stmt.bind(params); }
+            if (params != null) {
+                stmt.bind(params);
+            }
             this.statements[pStmt] = stmt;
             return stmt;
         }
@@ -549,9 +635,12 @@ export default (wasmModule, Sqlite3) => {
         @return [Uint8Array] An array of bytes of the SQLite3 database file
         */
         'export'() {
-            for (let _ in this.statements) { const stmt = this.statements[_]; stmt['free'](); }
+            for (let _ in this.statements) {
+                const stmt = this.statements[_];
+                stmt['free']();
+            }
             this.handleError(sqlite3_close_v2(this.db));
-            const binaryDb = readFile(this.filename, { encoding: "binary" });
+            const binaryDb = readFile(this.filename, {encoding: "binary"});
             this.handleError(sqlite3_open(this.filename, apiTemp));
             this.db = getValue(apiTemp, 'i32');
             return binaryDb;
@@ -568,10 +657,15 @@ export default (wasmModule, Sqlite3) => {
         Databases **must** be closed, when you're finished with them, or the
         memory consumption will grow forever
         */
-        'close'() {
-            for (let _ in this.statements) { const stmt = this.statements[_]; stmt['free'](); }
+        'close'(unlink = false) {
+            for (let _ in this.statements) {
+                const stmt = this.statements[_];
+                stmt['free']();
+            }
             this.handleError(sqlite3_close_v2(this.db));
-            unlink(`/${this.filename}`);
+            if (unlink) {
+                unlink(this.filename);
+            }
             return this.db = null;
         }
 
@@ -595,7 +689,9 @@ export default (wasmModule, Sqlite3) => {
 
         @return [Number] the number of rows modified
         */
-        'getRowsModified'() { return sqlite3_changes(this.db); }
+        'getRowsModified'() {
+            return sqlite3_changes(this.db);
+        }
 
         /* Register a custom function with SQLite
         @example Register a simple function
@@ -606,25 +702,34 @@ export default (wasmModule, Sqlite3) => {
         @param func [Function] the actual function to be executed.
         */
         'create_function'(name, func) {
-            const wrapped_func = function(cx, argc, argv) {
+            const wrapped_func = function (cx, argc, argv) {
                 // Parse the args from sqlite into JS objects
                 const args = [];
                 for (let i = 0, end = argc, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
-                    const value_ptr = getValue(argv+(4*i), 'i32');
+                    const value_ptr = getValue(argv + (4 * i), 'i32');
                     var value_type = sqlite3_value_type(value_ptr);
-                    const data_func = (() => { switch (false) {
-                        case value_type !== 1: return sqlite3_value_int;
-                        case value_type !== 2: return sqlite3_value_double;
-                        case value_type !== 3: return sqlite3_value_text;
-                        case value_type !== 4: return function(ptr) {
-                            const size = sqlite3_value_bytes(ptr);
-                            const blob_ptr = sqlite3_value_blob(ptr);
-                            const blob_arg = new Uint8Array(size);
-                            for (let j = 0, end1 = size, asc1 = 0 <= end1; asc1 ? j < end1 : j > end1; asc1 ? j++ : j--) { blob_arg[j] = HEAP8[blob_ptr+j]; }
-                            return blob_arg;
-                        };
-                        default: return ptr => null;
-                    } })();
+                    const data_func = (() => {
+                        switch (false) {
+                            case value_type !== 1:
+                                return sqlite3_value_int;
+                            case value_type !== 2:
+                                return sqlite3_value_double;
+                            case value_type !== 3:
+                                return sqlite3_value_text;
+                            case value_type !== 4:
+                                return function (ptr) {
+                                    const size = sqlite3_value_bytes(ptr);
+                                    const blob_ptr = sqlite3_value_blob(ptr);
+                                    const blob_arg = new Uint8Array(size);
+                                    for (let j = 0, end1 = size, asc1 = 0 <= end1; asc1 ? j < end1 : j > end1; asc1 ? j++ : j--) {
+                                        blob_arg[j] = HEAP8[blob_ptr + j];
+                                    }
+                                    return blob_arg;
+                                };
+                            default:
+                                return ptr => null;
+                        }
+                    })();
 
                     const arg = data_func(value_ptr);
                     args.push(arg);
@@ -637,9 +742,11 @@ export default (wasmModule, Sqlite3) => {
                 if (!result) {
                     return sqlite3_result_null(cx);
                 } else {
-                    switch (typeof(result)) {
-                        case 'number': return sqlite3_result_double(cx, result);
-                        case 'string': return sqlite3_result_text(cx, result, -1, -1);
+                    switch (typeof (result)) {
+                        case 'number':
+                            return sqlite3_result_double(cx, result);
+                        case 'string':
+                            return sqlite3_result_text(cx, result, -1, -1);
                     }
                 }
             };
@@ -650,6 +757,7 @@ export default (wasmModule, Sqlite3) => {
             return this;
         }
     }
+
     function __range__(left, right, inclusive) {
         let range = [];
         let ascending = left < right;

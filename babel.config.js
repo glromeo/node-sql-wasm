@@ -1,15 +1,6 @@
 module.exports = {
     presets: [
-        "@babel/typescript",
-        [
-            "@babel/env",
-            {
-                exclude: ["transform-regenerator"],
-                targets: {
-                    chrome: "42"
-                }
-            }
-        ]
+        "@babel/preset-typescript"
     ],
     plugins: ["@babel/plugin-syntax-dynamic-import"],
     env: {

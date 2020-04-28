@@ -1,10 +1,10 @@
 import createSqlite3Api from "./sql.js/sqlite3";
 // @ts-ignore
-import sqlite3Module from "./native/compiled/sqlite3";
+import sqlite3Module from "./compiled/sqlite3";
 // @ts-ignore
 import createSqlJs from "./sql.js";
 import { SQLWasm } from "./sql.js/typings";
-import wasmPath from "./native/compiled/sqlite3.wasm";
+import wasmPath from "./compiled/sqlite3.wasm";
 
 export * from "./sql.js/typings";
 

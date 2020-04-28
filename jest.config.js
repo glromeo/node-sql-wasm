@@ -11,10 +11,5 @@ module.exports = {
         "node"
     ],
     globals: {
-        "process.browser": false,
-        ENVIRONMENT_IS_NODE: true,
-        ENVIRONMENT_IS_WEB: false,
-        ENVIRONMENT_IS_WORKER: false,
-        ENVIRONMENT_IS_SHELL: false
     }
 };
