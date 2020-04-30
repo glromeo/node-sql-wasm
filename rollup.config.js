@@ -3,19 +3,19 @@ import babel from "rollup-plugin-babel";
 import resolve from "rollup-plugin-node-resolve";
 import url from "rollup-plugin-url";
 
-const extensions = [".ts", ".js"];
+const extensions = [".js"];
 
 const shared = {
-    input: "src/index.ts",
+    input: "src/index.js",
     external: ["path"],
     plugins: [
         url({
             limit: 0,
-            include: ["src/compiled/sqlite3.wasm"],
-            sourceDir: path.join(__dirname, "src/compiled/"),
+            include: ["out/sqlite3.wasm"],
+            sourceDir: path.join(__dirname, "out/"),
             fileName: "../[name][extname]"
         }),
-        babel({ extensions, include: ["src/**/*"], exclude: "src/compiled/sqlite3.js" }),
+        babel({ extensions, include: ["src/**/*"] }),
         resolve({ extensions })
     ]
 };

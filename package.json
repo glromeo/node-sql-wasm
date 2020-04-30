@@ -1,20 +1,19 @@
 {
-  "name": "sql-wasm",
-  "version": "1.1.4",
+  "name": "@codebite/sqlite-wasm",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ryan-codingintrigue/sql-wasm"
+    "url": "https://github.com/glromeo/sql-wasm"
   },
   "bugs": {
-    "url": "https://github.com/ryan-codingintrigue/sql-wasm"
+    "url": "https://github.com/glromeo/sql-wasm"
   },
   "description": "",
   "main": "./dist/cjs/sql-wasm.js",
   "module": "./dist/esm/sql-wasm.js",
-  "typings": "./dist/types/index.d.ts",
   "scripts": {
     "make-wasm": "npx nps llvm && npx nps emcc",
-    "build": "npm run make-wasm && rollup -c && tsc --emitDeclarationOnly",
+    "build": "npm run make-wasm && rollup -c",
     "test": "jest"
   },
   "keywords": [],
@@ -23,29 +22,16 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/preset-typescript": "^7.1.0",
     "@types/jest": "^25.2.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^25.4.0",
     "babel-plugin-dynamic-import-node": "^2.2.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^18.1.0",
-    "eslint-import-resolver-typescript": "^2.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-react": "^7.12.3",
-    "eslint-plugin-typescript": "^0.14.0",
     "jest": "^25.4.0",
     "nps": "^5.9.3",
-    "replace-in-file": "^6.0.0",
     "rollup": "^2.7.3",
     "rollup-plugin-babel": "^4.2.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-url": "^3.0.1",
-    "shx": "^0.3.2",
-    "typescript": "^3.2.2",
-    "typescript-eslint-parser": "^22.0.0"
+    "rollup-plugin-url": "^3.0.1"
   },
   "dependencies": {}
 }

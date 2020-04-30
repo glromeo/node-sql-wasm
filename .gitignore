@@ -88,5 +88,5 @@ typings/
 
 .vscode
 *.iml
-src/compiled/sqlite3.*
+out/
 dist/
