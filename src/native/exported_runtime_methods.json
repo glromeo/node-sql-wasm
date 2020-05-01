@@ -2,6 +2,7 @@
   "cwrap",
   "ALLOC_NORMAL",
   "FS",
+  "NODEFS",
   "addFunction",
   "allocate",
   "allocateUTF8OnStack",

@@ -1,5 +1,5 @@
 {
-  "name": "@codebite/sqlite-wasm",
+  "name": "@codebite/sql-wasm",
   "version": "1.0.0",
   "repository": {
     "type": "git",

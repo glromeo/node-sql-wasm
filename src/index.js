@@ -1,11 +1,12 @@
 import sqlite3Module from "../out/sqlite3";
-import createSqlJs from "./api";
+import createDatabase from "./Database.js";
+import createStatement from "./Statement.js";
 import wasmPath from "../out/sqlite3.wasm";
 
 import {join} from "path";
 
 export default () => new Promise((resolve, reject) => {
-    const wasm = sqlite3Module({
+    const runtime = sqlite3Module({
         noInitialRun: true,
         locateFile(url) {
             return url === "sqlite3.wasm" ? join(__dirname, wasmPath) : url;
@@ -14,8 +15,12 @@ export default () => new Promise((resolve, reject) => {
             reject(error);
         },
         onRuntimeInitialized() {
-            const sqlJs = createSqlJs(wasm);
-            resolve(sqlJs);
+            const Statement = createStatement(runtime)
+            const Database = createDatabase(runtime, {Statement});
+            resolve({
+                Statement,
+                Database
+            });
         }
     });
 });
