@@ -1,5 +1,5 @@
 {
-  "name": "@codebite/sqlite-wasm",
+  "name": "@codebite/sql-wasm",
   "version": "1.0.0",
   "repository": {
     "type": "git",
@@ -12,8 +12,10 @@
   "main": "./dist/cjs/sql-wasm.js",
   "module": "./dist/esm/sql-wasm.js",
   "scripts": {
-    "make-wasm": "npx nps llvm && npx nps emcc",
-    "build": "npm run make-wasm && rollup -c",
+    "llvm": "npx nps llvm",
+    "emcc": "npx nps emcc",
+    "dist": "npx nps emcc && rollup -c",
+    "build": "npx nps llvm && npx nps emcc && rollup -c",
     "test": "jest"
   },
   "keywords": [],
