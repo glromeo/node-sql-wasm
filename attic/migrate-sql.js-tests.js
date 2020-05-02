@@ -19,7 +19,7 @@ const files = [
 
 fs.writeFileSync("./sql-js.test.js", `
 const assert = require('assert').strict;
-const createSqlWasm = require("../dist/cjs/sql-wasm.js");
+const createSqlWasm = require("../dist/cjs/node-sql-wasm.js");
 
 describe("sql.js tests", function () {
     
