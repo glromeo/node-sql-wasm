@@ -64,7 +64,6 @@ export default function (runtime, {Statement}) {
         constructor({dbfile, data} = {}) {
             this.filename = dbfile ? `/working/${dbfile}` : `/dbfile_${(0xffffffff * Math.random()) >>> 0}`;
             if (dbfile) {
-                this.unlinkOnClose = true;
                 console.log("sqlite database:", this.filename);
             }
             if (data != null) {
@@ -315,7 +314,7 @@ export default function (runtime, {Statement}) {
          * Databases **must** be closed when you're finished with them, or the
          * memory consumption will grow forever
          */
-        close() {
+        close(unlink = true) {
             // do nothing if db is null or already closed
             if (this.db === null) {
                 return;
@@ -326,7 +325,7 @@ export default function (runtime, {Statement}) {
             Object.values(this.functions).forEach(removeFunction);
             this.functions = {};
             this.handleError(sqlite3_close_v2(this.db));
-            if (this.unlinkOnClose) {
+            if (unlink) {
                 FS.unlink(this.filename);
             }
             this.db = null;

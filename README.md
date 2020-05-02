@@ -74,15 +74,18 @@ stmt.free();
 
 // Export the database to an Uint8Array containing the SQLite database file
 let binaryArray = db.export();
-
-db.close() 
-// Would free your statements for you, if you pass true it will also delete the dbfile
 ```
 
-## Web?
+### NOTE: close() by default deletes the dbfile!!!
+This will likely change in the future, for now if you want to persist the dbfile use
+```js
+db.close(false) 
+```
 
-Web Worker and Browser functionality has been omitted from this implementation,
-this is meant to be used in NODE.JS only.
+## The Web?
+
+Web Worker and Browser functionality have been omitted/neglected in this implementation,
+this module is meant to be used in NODE.JS only (either via CJS or ESM import).
 
 ## Development
 
