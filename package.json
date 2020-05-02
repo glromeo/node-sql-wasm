@@ -1,16 +1,16 @@
 {
-  "name": "@codebite/sql-wasm",
+  "name": "node-sql-wasm",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/glromeo/sql-wasm"
+    "url": "https://github.com/glromeo/node-sql-wasm"
   },
   "bugs": {
-    "url": "https://github.com/glromeo/sql-wasm"
+    "url": "https://github.com/glromeo/node-sql-wasm"
   },
   "description": "",
-  "main": "./dist/cjs/sql-wasm.js",
-  "module": "./dist/esm/sql-wasm.js",
+  "main": "./dist/cjs/node-sql-wasm.js",
+  "module": "./dist/esm/node-sql-wasm.js",
   "scripts": {
     "llvm": "npx nps llvm",
     "emcc": "npx nps emcc",

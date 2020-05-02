@@ -3,7 +3,7 @@ import babel from "rollup-plugin-babel";
 import resolve from "rollup-plugin-node-resolve";
 import url from "rollup-plugin-url";
 
-const extensions = [".js"];
+const entryFileNames = "node-sql-wasm.js";
 
 const shared = {
     input: "src/index.js",
@@ -15,8 +15,8 @@ const shared = {
             sourceDir: path.join(__dirname, "out/"),
             fileName: "../[name][extname]"
         }),
-        babel({ extensions, include: ["src/**/*"] }),
-        resolve({ extensions })
+        babel({ extensions: [".js"], include: ["src/**/*"] }),
+        resolve({ extensions: [".js"] })
     ]
 };
 
@@ -24,7 +24,7 @@ const cjs = {
     ...shared,
     output: {
         dir: "dist/cjs",
-        entryFileNames: "sql-wasm.js",
+        entryFileNames: entryFileNames,
         format: "cjs"
     },
     plugins: [
@@ -36,7 +36,7 @@ const esm = {
     ...shared,
     output: {
         dir: "dist/esm",
-        entryFileNames: "sql-wasm.js",
+        entryFileNames: entryFileNames,
         format: "esm"
     },
     plugins: [
