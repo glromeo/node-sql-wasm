@@ -1,11 +1,11 @@
 import {
+    SQLITE3_TEXT,
     SQLITE_BLOB,
     SQLITE_DONE,
     SQLITE_FLOAT,
     SQLITE_INTEGER,
     SQLITE_OK,
-    SQLITE_ROW,
-    SQLITE3_TEXT
+    SQLITE_ROW
 } from "../out/sqlite3.h.js"
 
 import sqlite3api from "./sqlite3-api.js";
@@ -123,7 +123,7 @@ export default function (runtime) {
             if (!this.stmt) {
                 throw "Statement closed";
             }
-            this["reset"]();
+            this.reset();
             if (Array.isArray(values)) return this.bindFromArray(values);
             if (values != null && typeof values === "object") return this.bindFromObject(values);
             return true;
@@ -195,8 +195,8 @@ export default function (runtime) {
          while (stmt.step()) console.log(stmt.get());
          */
         get(params) {
-            if (params != null && this["bind"](params)) {
-                this["step"]();
+            if (params != null && this.bind(params)) {
+                this.step();
             }
             const results1 = [];
             const ref = sqlite3_data_count(this.stmt);
@@ -257,8 +257,8 @@ export default function (runtime) {
          // Will print {nbr:5, data: Uint8Array([1,2,3]), null_value:null}
          */
         getAsObject(params) {
-            const values = this["get"](params);
-            const names = this["getColumnNames"]();
+            const values = this.get(params);
+            const names = this.getColumnNames();
             const rowObject = {};
             const len = names.length;
             let i = 0;
@@ -277,10 +277,10 @@ export default function (runtime) {
          */
         run(values) {
             if (values != null) {
-                this["bind"](values);
+                this.bind(values);
             }
-            this["step"]();
-            return this["reset"]();
+            this.step();
+            return this.reset();
         }
 
         bindString(string, pos) {

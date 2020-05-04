@@ -22,7 +22,7 @@ export default function (runtime, {Statement}) {
     } = runtime;
 
     FS.mkdir('/working');
-    FS.mount(NODEFS, { root: '.' }, '/working');
+    FS.mount(NODEFS, {root: '.'}, '/working');
 
     const apiTemp = stackAlloc(4); // Declare toplevel variables register, used for temporary stack values
     const NULL = 0; // Null pointer
@@ -97,11 +97,11 @@ export default function (runtime, {Statement}) {
                 throw "Database closed";
             }
             if (params) {
-                const stmt = this["prepare"](sql, params);
+                const stmt = this.prepare(sql, params);
                 try {
-                    stmt["step"]();
+                    stmt.step();
                 } finally {
-                    stmt["free"]();
+                    stmt.free();
                 }
             } else {
                 this.handleError(sqlite3_exec(this.db, sql, 0, 0, apiTemp));
@@ -202,27 +202,51 @@ export default function (runtime, {Statement}) {
                         if (params != null) {
                             stmt.bind(params);
                         }
-                        while (stmt["step"]()) {
+                        while (stmt.step()) {
                             if (curresult === null) {
                                 curresult = {
-                                    columns: stmt["getColumnNames"](),
+                                    columns: stmt.getColumnNames(),
                                     values: [],
                                 };
                                 results.push(curresult);
                             }
-                            curresult["values"].push(stmt["get"]());
+                            curresult.values.push(stmt.get());
                         }
-                        stmt["free"]();
+                        stmt.free();
                     }
                 }
                 return results;
             } catch (errCaught) {
                 if (stmt) {
-                    stmt["free"]();
+                    stmt.free();
                 }
                 throw errCaught;
             } finally {
                 stackRestore(stack);
+            }
+        };
+
+        query(sql, params) {
+            const stmt = this.prepare(sql, params);
+            try {
+                const results = [];
+                if (stmt.step()) {
+                    const columns = stmt.getColumnNames();
+                    do {
+                        const values = stmt.get();
+                        const row = Object.create(null);
+
+                        let i = columns.length;
+                        while (--i >= 0) {
+                            row[columns[i]] = values[i];
+                        }
+                        results.push(row);
+
+                    } while (stmt.step());
+                }
+                return results;
+            } finally {
+                stmt.free();
             }
         };
 
@@ -251,13 +275,13 @@ export default function (runtime, {Statement}) {
                 callback = params;
                 params = undefined;
             }
-            const stmt = this["prepare"](sql, params);
+            const stmt = this.prepare(sql, params);
             try {
-                while (stmt["step"]()) {
-                    callback(stmt["getAsObject"]());
+                while (stmt.step()) {
+                    callback(stmt.getAsObject());
                 }
             } finally {
-                stmt["free"]();
+                stmt.free();
             }
             if (typeof done === "function") {
                 return done();
@@ -293,7 +317,7 @@ export default function (runtime, {Statement}) {
          */
         export() {
             Object.values(this.statements).forEach(function each(stmt) {
-                stmt["free"]();
+                stmt.free();
             });
             Object.values(this.functions).forEach(removeFunction);
             this.functions = {};
@@ -320,7 +344,7 @@ export default function (runtime, {Statement}) {
                 return;
             }
             Object.values(this.statements).forEach(function each(stmt) {
-                stmt["free"]();
+                stmt.free()
             });
             Object.values(this.functions).forEach(removeFunction);
             this.functions = {};
