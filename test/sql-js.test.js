@@ -15,7 +15,7 @@ describe("sql.js tests", function () {
 
 
     it("test_blob", async function () {
-        var db = new sql.Database({dbfile: "test_blob.db"});
+        var db = new sql.Database({dbfile: "/test_blob.db"});
         db.exec("CREATE TABLE test (data); INSERT INTO test VALUES (x'6162ff'),(x'00')"); // Insert binary data. This is invalid UTF8 on purpose
 
         var stmt = db.prepare("INSERT INTO test VALUES (?)");

@@ -226,28 +226,19 @@ export default function (runtime, {Statement}) {
             }
         };
 
-        query(sql, params) {
-            const stmt = this.prepare(sql, params);
-            try {
-                const results = [];
-                if (stmt.step()) {
-                    const columns = stmt.getColumnNames();
-                    do {
-                        const values = stmt.get();
-                        const row = Object.create(null);
-
-                        let i = columns.length;
-                        while (--i >= 0) {
-                            row[columns[i]] = values[i];
-                        }
-                        results.push(row);
-
-                    } while (stmt.step());
-                }
-                return results;
-            } finally {
-                stmt.free();
+        createStatement(sql) {
+            setValue(apiTemp, 0, "i32");
+            this.handleError(sqlite3_prepare_v2(this.db, sql, -1, apiTemp, NULL));
+            // pointer to a statement, or null
+            const pStmt = getValue(apiTemp, "i32");
+            if (pStmt === NULL) {
+                throw "Nothing to prepare";
             }
+            return new Statement(pStmt, this);
+        }
+
+        query(sql, params) {
+            return this.createStatement(sql).exec(params);
         };
 
         /** Execute an sql statement, and call a callback for each row of result.
@@ -297,18 +288,11 @@ export default function (runtime, {Statement}) {
          @throws {String} SQLite error
          */
         prepare(sql, params) {
-            setValue(apiTemp, 0, "i32");
-            this.handleError(sqlite3_prepare_v2(this.db, sql, -1, apiTemp, NULL));
-            // pointer to a statement, or null
-            const pStmt = getValue(apiTemp, "i32");
-            if (pStmt === NULL) {
-                throw "Nothing to prepare";
-            }
-            const stmt = new Statement(pStmt, this);
+            const stmt = this.createStatement(sql);
             if (params != null) {
                 stmt.bind(params);
             }
-            this.statements[pStmt] = stmt;
+            this.statements[stmt.stmt] = stmt;
             return stmt;
         };
 

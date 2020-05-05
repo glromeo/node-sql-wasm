@@ -270,6 +270,42 @@ export default function (runtime) {
             return rowObject;
         }
 
+        exec(params) {
+            try {
+                if (params) {
+                    this.bind(params);
+                }
+                const results = [];
+                if (this.step()) {
+                    const columns = this.getColumnNames();
+                    const setters = columns.map((name, index) => {
+                        switch (sqlite3_column_type(this.stmt, index)) {
+                            case SQLITE_INTEGER:
+                            case SQLITE_FLOAT:
+                                return row => row[name] = this.getNumber(index);
+                            case SQLITE3_TEXT:
+                                return row => row[name] = this.getString(index);
+                            case SQLITE_BLOB:
+                                return row => row[name] = this.getBlob(index);
+                            default:
+                                return row => row[name] = null;
+                        }
+                    });
+                    do {
+                        const row = Object.create(null);
+                        for (const setter of setters) {
+                            setter(row);
+                        }
+                        results.push(row);
+
+                    } while (this.step());
+                }
+                return results;
+            } finally {
+                this.free();
+            }
+        }
+
         /** Shorthand for bind + step + reset
          Bind the values, execute the statement, ignoring the rows it returns,
          and resets it
